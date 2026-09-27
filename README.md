@@ -1,6 +1,6 @@
 # OpenFastTrace AI Skills
 
-This repository contains a collection of AI skills around using [OpenFastTrace](https://openfasttrace.itsallcode.com).
+This repository contains a collection of AI skills around using [OpenFastTrace](https://openfasttrace.itsallcode.org).
 
 ### MIT License
 
@@ -10,6 +10,6 @@ Skills are often used as templates, and the individual modifications are highly 
 
 ## Skills in This Repository
 
-- **[OpenFastTrace](skills/skills/openfasttrace/)** — Covers OpenFastTrace requirement tracing, including item ID syntax, Markdown and Gherkin coverage markers, and trace verification through the CLI, Maven, or Gradle. Use it when creating, reviewing, or validating traced specifications, code, tests, or documentation.
-- **[OFT Spec-Driven Development (`oft-spec-driven-development`)](skills/skills/openfasttrace-spec-driven-development/)** — Guides a spec-first development workflow that turns issues into changeset task plans and keeps traced requirements, arc42 design documents, implementation, and quality gates aligned before and during development.
-- **[OpenFastTrace Reverse Specs](skills/skills/openfasttrace-reverse-specs/)** — Reverse-engineers missing or incomplete system requirements and arc42-style design documents from user guides, existing documentation, source code, and tests. Use it to reconstruct and trace specifications from existing project artifacts.
+- **[OpenFastTrace](skills/skills/openfasttrace/SKILL.md)** — Covers OpenFastTrace requirement tracing, including item ID syntax, Markdown and Gherkin coverage markers, and trace verification through the CLI, Maven, or Gradle. Use it when creating, reviewing, or validating traced specifications, code, tests, or documentation.
+- **[OFT Spec-Driven Development](skills/skills/openfasttrace-spec-driven-development/SKILL.md)** — Guides a spec-first development workflow that turns issues into changeset task plans and keeps traced requirements, arc42 design documents, implementation, and quality gates aligned before and during development.
+- **[OpenFastTrace Reverse Specs](skills/skills/openfasttrace-reverse-specs/SKILL.md)** — Reverse-engineers missing or incomplete system requirements and arc42-style design documents from user guides, existing documentation, source code, and tests. Use it to reconstruct and trace specifications from existing project artifacts.
