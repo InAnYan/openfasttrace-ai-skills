@@ -118,7 +118,7 @@ Build the document in this order:
 1. Create or update `doc/design.md` and `doc/design/` using:
 
    - `assets/design_index_template.md`
-   - files under `assets/design/`
+   - files under `assets/design`
 
 2. Derive design from code and tests, then match it against `doc/system_requirements.md`.
 

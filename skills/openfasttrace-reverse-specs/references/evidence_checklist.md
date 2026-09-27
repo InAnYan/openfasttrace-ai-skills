@@ -7,7 +7,7 @@ Use this checklist when reverse-engineering requirements and design from an unfa
 Search for:
 
 * `README*`
-* `docs/`, `doc/`, `manual/`, `guide/`, `user_guide*`
+* `docs/`, `../../../doc`, `manual/`, `guide/`, `user_guide*`
 * tutorials, examples, sample projects, demo scripts, screenshots
 * CLI help, man pages, shell completion files
 * public API docs, generated docs, OpenAPI specs, GraphQL schemas
