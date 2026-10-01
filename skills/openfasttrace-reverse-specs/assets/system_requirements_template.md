@@ -23,13 +23,15 @@ This draft was reverse-engineered from:
 
 This document uses OpenFastTrace specification items to express product features, user requirements, and acceptance scenarios. Each specification item has a unique identifier in the form `<artifact-type>~<name>~<revision>`.
 
-In this document, feature items use the artifact type `feat`, user requirements use `req`, and acceptance scenarios use `scn`. Design items in `doc/design.md` and `doc/design/` cover the scenarios with artifact type `dsn`. Architecture constraints in `doc/design/constraints.md` use artifact type `constr` and are also covered by `dsn` items.
+In this document, feature items use the artifact type `feat`, user requirements use `req`, and acceptance scenarios use `scn`. Design items in `doc/design/design.md` and the other chapters under `doc/design/` cover the scenarios with artifact type `dsn`. Architecture constraints in `doc/design/constraints.md` use artifact type `constr` and are also covered by `dsn` items.
 
 Informative text explains background, scope, and intent. Specification items define the normative content of the document. Relationships between items are expressed with OpenFastTrace keywords such as `Needs` and `Covers`.
 
 ## Terms and Abbreviations
 
-### `<Term>`
+<!-- Terms and roles are H6, so that an anchor exists that you can reference. -->
+
+###### `<Term>`
 
 `<Definition>`
 
@@ -37,7 +39,7 @@ Informative text explains background, scope, and intent. Specification items def
 
 Describe the people or systems that use, operate, administer, integrate, or maintain the product. Use the general term `user` only when a requirement does not depend on a specific role.
 
-### `<Role>`
+###### `<Role>`
 
 `<Role description and expected interaction with the product.>`
 

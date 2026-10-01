@@ -2,7 +2,7 @@
 
 This chapter describes relevant runtime interactions for the main use cases and extension points.
 
-Terms use the definitions from [System Requirements](../system_requirements.md).
+Terms use the definitions from [User and System Requirements](../requirements/requirements.md).
 
 ## `<Use Case or Runtime Area>`
 

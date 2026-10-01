@@ -1,6 +1,6 @@
 ---
 name: openfasttrace-reverse-specs
-description: Reverse-engineer missing or incomplete OpenFastTrace system requirements and arc42-style design documentation from a project's user guide, existing documentation, tests, and code. Use when the agent must draft or repair `doc/system_requirements.md`, `doc/design.md`, and `doc/design/` chapters; infer features, requirements, scenarios, and design items; align design coverage with requirements; and report contradictions or open issues found during reverse engineering.
+description: Reverse-engineer missing or incomplete OpenFastTrace system requirements and arc42-style design documentation from a project's user guide, existing documentation, tests, and code. Use when the agent must draft or repair `doc/requirements/requirements.md`, `doc/design/design.md`, and design chapters under `doc/design/`; infer features, requirements, scenarios, and design items; align design coverage with requirements; and report contradictions or open issues found during reverse engineering.
 ---
 
 # OpenFastTrace Reverse Specs
@@ -13,7 +13,9 @@ Use the bundled templates when creating new documentation:
 - `assets/design_index_template.md`
 - `assets/design/*.md`
 
-For OFT syntax and trace behavior, use the `openfasttrace-skill` if it is available in the session.
+For OFT syntax and trace behavior, use the `openfasttrace-skill` if it is available in the session. If it is not present, download it from:
+
+https://raw.githubusercontent.com/itsallcode/openfasttrace-ai-skills/refs/heads/main/skills/openfasttrace/SKILL.md
 
 ## Operating Rules
 
@@ -21,7 +23,7 @@ For OFT syntax and trace behavior, use the `openfasttrace-skill` if it is availa
 - DO NOT change the documents from which you reverse engineer specification (user guide, README).
 - Preserve existing project specification documents unless the user explicitly asks to replace them. If a target file exists, patch it carefully or create a clearly named draft beside it.
 - Keep a source inventory while working. For every inferred requirement or design item, know whether it came from user guide, README, tests, source code, configuration, build files, issue text, or runtime behavior.
-- Prefer explicit evidence over speculation. Mark weakly supported conclusions in `Open Issues`.
+- Prefer explicit evidence to speculation. Mark weakly supported conclusions in `Open Issues`.
 - Do not hide contradictions. Summarize them in the final answer and record them in the generated document's `Open Issues` section.
 - Use stable OFT item IDs in lower-kebab-case unless the project already uses another convention.
 - Use revision `~1` for newly inferred items unless replacing an existing item with a semantically incompatible version.
@@ -55,10 +57,10 @@ Run traces with the narrowest artifact scope for the current reverse-engineering
 
 ### System Requirements Only
 
-Run this after Step 1 to check feature, requirement, and scenario links inside `doc/system_requirements.md`:
+Run this after Step 1 to check feature, requirement, and scenario links inside `doc/requirements/requirements.md`:
 
 ```bash
-oft trace -a feat,req,scn doc/system_requirements.md
+oft trace -a feat,req,scn doc/requirements/requirements.md
 ```
 
 Expected result: feature, requirement, and scenario links are complete. Downstream design coverage is intentionally out of scope in this trace, even when scenarios declare `Needs: dsn`.
@@ -68,7 +70,7 @@ Expected result: feature, requirement, and scenario links are complete. Downstre
 Run this after Step 2 to check coverage from system requirements down to design:
 
 ```bash
-oft trace -a feat,req,scn,constr,dsn doc/system_requirements.md doc/design.md doc/design
+oft trace -a feat,req,scn,constr,dsn doc/requirements/requirements.md doc/design
 ```
 
 Expected result: scenarios are covered by design items or OFT forwarding notation. Implementation and test coverage are intentionally out of scope.
@@ -91,9 +93,19 @@ At the end of Step 1 and Step 2, summarize unresolved issues as a numbered list 
 
 Ask earlier only when a contradiction blocks writing a traceable draft.
 
+## Requirements and Design Style
+
+Apply these rules to requirements and design documentation:
+
+- Use Associated Press headline-style capitalization for headings and specification item titles.
+- Write in a clear, compact, active voice.
+- State requirements in natural-language present tense as if the behavior were already implemented. Do not use `shall`, `should`, or `should not`.
+- Make requirements increasingly atomic below the feature level: each refinement should be narrower and more precise than the item above it.
+- Make every requirement testable or otherwise objectively verifiable.
+
 ## Step 1: Draft System Requirements
 
-Create or update `doc/system_requirements.md` using `assets/system_requirements_template.md`.
+Create or update the user and system requirements index at `doc/requirements/requirements.md` using `assets/system_requirements_template.md`.
 
 Build the document in this order:
 
@@ -110,21 +122,21 @@ Build the document in this order:
 8. Record uncertain inferences, missing intent, duplicate behavior, and contradictions in `Open Issues`.
 9. Run a [Decision Checkpoint](#decision-checkpoints) for open issues that affect system requirements.
 10. Run the [System Requirements Only](#system-requirements-only) trace. Verify the trace is clean for the included artifact types.
-11. After drafting system requirements, stop for user review unless the user explicitly requested a complete requirements-and-design reverse-engineering pass in one turn. Ask the user to remove the draft marker from requirements they reviewed and approved.
+11. After drafting system requirements, stop for user review unless the user explicitly requested a complete requirements-and-design reverse-engineering pass in one turn. **Ask the user to remove the draft marker from requirements they reviewed and approved.**
 12. Report draft / total counts by artifact type and overall.
 
 ## Step 2: Draft Design
 
-1. Create or update `doc/design.md` and `doc/design/` using:
+1. Create or update the design index at `doc/design/design.md` and its chapters under `doc/design/` using:
 
    - `assets/design_index_template.md`
    - files under `assets/design`
 
-2. Derive design from code and tests, then match it against `doc/system_requirements.md`.
+2. Derive design from code and tests, then match it against `doc/requirements/requirements.md`.
 
    Use this design structure:
 
-   - Introduction and goals in `doc/design.md`
+   - Introduction and goals in `doc/design/design.md`
    - Architecture constraints
    - Context and scope
    - Solution strategy
@@ -138,9 +150,21 @@ Build the document in this order:
    - Glossary
    - Open issues
 
-3. Add `dsn` items where design decisions or runtime behavior cover `scn` and `constr` items. Prefer one runtime `dsn` per scenario or constraint. If a design layer adds no information, use OFT forwarding notation rather than inventing redundant design text.
-4. If the documents contain information about intentional technical constraints, document them as `constr` in section `Architecture constraints`. Each `constr` item needs `dsn` coverage, and at least one `dsn` item must cover it. For example the project documentation states that only builds for x86 are supplied. Try not to infer constraints from the code, because they might not be intentional.
-5. Record contradictions under `Open Issues`, especially when:
+3. Separate structure from behavior:
+   - Put static decomposition, components, responsibilities, interfaces, and dependencies in the building block view.
+   - Put interactions, workflows, control flow, data flow over time, and other behavior in the runtime view.
+4. Represent every `scn` item from the user requirements in the runtime view with at least one `dsn` element: an explicit `dsn` item, or a `dsn` forward as described next when design adds no significant information. Keep each explicit runtime `dsn` focused on one scenario or constraint unless combining them adds essential design information.
+5. If a design item would add no significant information to its scenario, put an OFT forward in the runtime view instead of inventing redundant design text. Place forwards in a dedicated section after complete specification items because a forward terminates the preceding item. For example:
+
+   ```markdown
+   ## Forwarded Scenarios
+
+   - `dsn --> impl, itest : scn~export-report~1`
+   ```
+
+   This skips the redundant `dsn` item and forwards the scenario's required design coverage to implementation and integration-test evidence. Choose the target artifact types that the scenario actually needs downstream.
+6. If the documents contain information about intentional technical constraints, document them as `constr` in section `Architecture constraints`. Each `constr` item needs `dsn` coverage, and at least one `dsn` item must cover it. For example the project documentation states that only builds for x86 are supplied. Try not to infer constraints from the code, because they might not be intentional.
+7. Record contradictions under `Open Issues`, especially when:
 
    - a scenario from system requirements is not implemented by the observed design,
    - code implements behavior with no requirement,
@@ -149,10 +173,10 @@ Build the document in this order:
    - public configuration or API behavior is undocumented,
    - dependencies, persistence, network access, security, or deployment behavior contradict stated constraints.
 
-6. Run a [Decision Checkpoint](#decision-checkpoints) for open issues that affect design or design coverage.
-7. Run the [System Requirements to Design](#system-requirements-to-design) trace. Verify the trace is clean for the included artifact types.
-8. After drafting the design, stop for user review unless the user explicitly requested a complete requirements-and-design reverse-engineering pass in one turn. Ask the user to remove the draft marker from requirements they reviewed and approved.
-9. Report draft / total counts by artifact type and overall.
+8. Run a [Decision Checkpoint](#decision-checkpoints) for open issues that affect design or design coverage.
+9. Run the [System Requirements to Design](#system-requirements-to-design) trace. Verify the trace is clean for the included artifact types.
+10. After drafting the design, stop for user review unless the user explicitly requested a complete requirements-and-design reverse-engineering pass in one turn. Ask the user to remove the draft marker from requirements they reviewed and approved.
+11. Report draft / total counts by artifact type and overall.
 
 ## Step 3: Add Coverage Markers in Implementation and Tests
 

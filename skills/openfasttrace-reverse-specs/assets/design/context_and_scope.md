@@ -2,7 +2,7 @@
 
 This chapter describes the technical context, neighboring systems, external interfaces, and system boundary.
 
-Terms use the definitions from [System Requirements](../system_requirements.md).
+Terms use the definitions from [User and System Requirements](../requirements/requirements.md).
 
 ## System Boundary
 

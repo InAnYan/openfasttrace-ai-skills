@@ -2,7 +2,7 @@
 
 This chapter documents architecture-relevant quality requirements and technical quality goals.
 
-User-facing acceptance scenarios are defined in [System Requirements](../system_requirements.md).
+User-facing acceptance scenarios are defined in [User and System Requirements](../requirements/requirements.md).
 
 ## Requirement Quality
 
