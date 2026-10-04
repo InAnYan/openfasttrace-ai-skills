@@ -47,6 +47,8 @@ Covers:
 Needs: dsn, impl, utest
 ```
 
+The identifier must be placed on the line immediately below the Markdown heading with **no empty line**.
+
 - **Forwarding**: `arch --> dsn : req~id~1` (delegates coverage without repeating).
 - **Exclusion**: Use `<!-- oft:off -->` and `<!-- oft:on -->` to skip parsing.
 
