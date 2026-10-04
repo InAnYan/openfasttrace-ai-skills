@@ -1,6 +1,6 @@
 ---
 name: openfasttrace
-description: Work with OpenFastTrace requirement tracing, including specification items, artifact IDs, coverage markers, Markdown and Gherkin syntax, and trace validation. Use when Codex needs to create, edit, review, or validate OpenFastTrace-traced requirements, design, implementation, tests, or documentation.
+description: Work with OpenFastTrace requirement tracing, including specification items, artifact IDs, coverage markers, Markdown and Gherkin syntax, and trace validation. Use when you need to create, edit, review, or validate OpenFastTrace-traced requirements, design, implementation, tests, or documentation.
 ---
 
 # OpenFastTrace (OFT) Skill
@@ -14,18 +14,25 @@ OpenFastTrace is a tool for requirement tracing across various artifacts (specif
   - Common: `feat`, `req`, `arch`, `dsn`, `impl`, `utest`, `itest`, `stest`, `uman`, `oman`.
 - **ID Syntax**: `type~name~revision` (e.g., `req~login-feature~1`).
   - `name`: Hierarchical with dots (e.g., `ui.button.save`).
-  - `revision`: Integer used for versioning.
+  - `revision`: Integer (starts from 1) used for versioning.
     - Incrementing the revision breaks all incoming links (coverage and dependencies).
     - This forces covering items to be updated and re-verified.
 - **Keywords**:
-  - `Covers: <ID>`: Current item implements/details the target ID.
-  - `Needs: <types>`: Artifact types required to cover this item.
-  - `Status: <status>`: `draft`, `proposed`, `approved`.
-  - `Depends: <IDs>`: Defines dependencies (no effect on coverage).
+  - `Covers: <ID>`: Current item implements/details the target ID. To specify ID, you need to use the unordered list (inline ID is not supported):
+    ```markdown
+    Covers:
+    - <ID>
+    ```
+  - `Needs: <types>`: Artifact types required to cover this item, separated by comma.
+  - `Status: <status>`: Possible values are `draft`, `proposed`, `approved`, `rejected`. Has to occur before `Description`, `Rationale` or `Comment`.
+  - `Depends: <IDs>`: Defines dependencies (no effect on coverage). Write an unordered list like in `Covers` (inline ID is not supported).
   - `Description: <text>`: Optional keyword to start description.
   - `Rationale: <text>`, `Comment: <text>`.
+  - `Tags: <tags>`: Optional tags.
 
-## Syntax: Markdown
+## Syntax
+
+### Markdown
 
 ```markdown
 ### Title
@@ -34,7 +41,8 @@ Description of the requirement.
 
 Rationale: Why this is needed.
 
-Covers: feat~parent~1
+Covers:
+- feat~parent~1
 
 Needs: dsn, impl, utest
 ```
@@ -42,24 +50,24 @@ Needs: dsn, impl, utest
 - **Forwarding**: `arch --> dsn : req~id~1` (delegates coverage without repeating).
 - **Exclusion**: Use `<!-- oft:off -->` and `<!-- oft:on -->` to skip parsing.
 
-## Syntax: Coverage Tags (many file formats)
+### Coverage Tags (many file formats)
 
-Implementation covering design in a C++ file:
+Implementation covering design in a Java/C++ file:
 
-```C++
-// [impl -> dsn~hash-sum-calculation~1]
 ```
-
-Unit test in a Java file:
-
-```shell
 // [utest -> dsn~hash-sum-calculation~1]
 ```
 
-Coverage in a YMAL file (e.g., GitHub workflow)
+Coverage in a YAML file (e.g., GitHub workflow):
 
 ```yaml
-# [bld -> dsn~create-sbom~2]
+# [bld->dsn~create-sbom~2]
+```
+
+Coverage in a Markdown file:
+
+```markdown
+<!-- [uman->feat~ai-skill~1] -->
 ```
 
 Require coverage:
@@ -74,9 +82,7 @@ Multiple coverage:
 // [dsn -> req~local-stability~1,arch~dimensional-input~1]
 ```
 
-## Tracing
-
-## Syntax: Gherkin
+### Gherkin
 
 Gherkin `.feature` files can define OFT scenario items. Put exactly one OFT ID
 in the contiguous tag region immediately before a `Scenario` or `Scenario
@@ -100,7 +106,7 @@ evaluated for coverage tags.
 
 Tracing can be performed via CLI, Maven, or Gradle.
 
-### CLI Usage
+## CLI Usage
 
 General form: `oft <command> [options] <files/dirs>`
 
@@ -113,7 +119,13 @@ General form: `oft <command> [options] <files/dirs>`
   - `-v, --report-verbosity`: `quiet`, `minimal`, `summary`, `failures`, `failure_summaries`, `failure_details` (default), `overview`, `all`.
   - `-i, --ignore-artifact-types`: Exclude types from import.
 
-### Maven Integration
+Exit codes:
+
+- `0`: Success.
+- `1`: OFT error.
+- `2`: Command line error.
+
+## Maven Integration
 
 - **User Guide**: [openfasttrace-maven-plugin](https://github.com/itsallcode/openfasttrace-maven-plugin)
 
@@ -138,7 +150,7 @@ Add the `openfasttrace-maven-plugin` to your `pom.xml`:
 
 - **Run**: `mvn openfasttrace:trace`
 
-### Gradle Integration
+## Gradle Integration
 
 - **User Guide**: [openfasttrace-gradle](https://github.com/itsallcode/openfasttrace-gradle)
 
@@ -156,7 +168,7 @@ openfasttrace {
 
 - **Run**: `gradle trace`
 
-### Partial Tracing & Filtering
+## Partial Tracing & Filtering
 
 Partial tracing allows teams to focus on specific layers of the traceability chain, reducing noise and build time.
 
@@ -185,9 +197,4 @@ Partial tracing allows teams to focus on specific layers of the traceability cha
 - Ensure ID consistency across specifications and code.
 - **Semantic Changes**: Increment the revision when the meaning of a requirement changes. This enforces a check of all covering items as their links become invalid.
 - Verify changes by running tracing.
-
-## Exit Codes
-
-- `0`: Success.
-- `1`: OFT error.
-- `2`: Command line error.
+- Always follow the project guidelines for writing the requirements: different teams have use different style for title, artifact types, dependency chains. As a fallback, use only `req` type for all requirements and `impl`, `utest` for `Needs`.
