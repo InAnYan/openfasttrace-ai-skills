@@ -2,6 +2,12 @@
 
 This repository contains a collection of AI skills around using [OpenFastTrace](https://openfasttrace.itsallcode.org).
 
+To install them, you can use:
+
+```sh
+npx skills add itsallcode/openfasttrace-ai-skills
+```
+
 ### MIT License
 
 While OpenFastTrace itself is licensed under the GPL, the skills in this repository are licensed under the [MIT license](LICENSE). The reason for this is to allow developers to use and modify the skills without having to release their modifications.
