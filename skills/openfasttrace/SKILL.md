@@ -50,6 +50,12 @@ Needs: dsn, impl, utest
 - **Forwarding**: `arch --> dsn : req~id~1` (delegates coverage without repeating).
 - **Exclusion**: Use `<!-- oft:off -->` and `<!-- oft:on -->` to skip parsing.
 
+If the project uses `markdownlint`, add this line at the end of the Markdown file with OFT specification items:
+
+```
+<!-- markdownlint-disable-file MD022 -->
+```
+
 ### Coverage Tags (many file formats)
 
 Implementation covering design in a Java/C++ file:
@@ -197,4 +203,10 @@ Partial tracing allows teams to focus on specific layers of the traceability cha
 - Ensure ID consistency across specifications and code.
 - **Semantic Changes**: Increment the revision when the meaning of a requirement changes. This enforces a check of all covering items as their links become invalid.
 - Verify changes by running tracing.
-- Always follow the project guidelines for writing the requirements: different teams have use different style for title, artifact types, dependency chains. As a fallback, use only `req` type for all requirements and `impl`, `utest` for `Needs`.
+- Always follow the project guidelines for writing the requirements. In particular, they should answer:
+  - Where to put the requirements.
+  - How to structure or group the requirements.
+  - Style of the title and description.
+  - How the traceability chain looks like.
+  - Which artifact types are used in the project.
+- If there are no guidelines for requirements, as a fallback, use only `req` type for all requirements and `impl`, `utest` for `Needs`.
