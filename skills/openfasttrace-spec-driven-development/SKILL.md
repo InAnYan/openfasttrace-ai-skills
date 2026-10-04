@@ -1,5 +1,5 @@
 ---
-name: oft-spec-driven-development
+name: openfasttrace-spec-driven-development
 description: Support spec-driven development in projects that use OpenFastTrace, a system-requirements document in `doc/system_requirements.md`, an arc42-style design in `doc/design.md`, and per-issue task plans in `doc/changesets/`. Use when AI agent must turn a new GitHub issue or Jira ticket into a changeset plan, update traced requirements and design before or alongside code, and keep all implementation and verification work aligned with the project's quality requirements.
 ---
 
