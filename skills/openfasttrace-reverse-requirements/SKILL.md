@@ -1,179 +1,167 @@
 ---
 name: oft-reverse-requirements
-description: Reverse-engineer domain requirements from existing source code and unit tests into OpenFastTrace specification items, link implementation and test coverage markers, and ensure clean separation between domain rules and implementation mechanics. Use when an AI agent needs to deduce requirements from legacy or untraced code, formulate self-evident normative requirements, and trace them using OpenFastTrace.
+description: Reverse-engineer requirements from existing source code and tests into OpenFastTrace specification items, link implementation and test coverage markers, and adapt to the project's requirement guidelines. Use when an AI agent needs to deduce requirements from legacy or untraced code, identify business rules and edge cases, and trace them using OpenFastTrace.
 ---
 
 # OFT Reverse Requirements from Code
 
-Extract clean, stable domain requirements from existing source code and tests, represent them as OpenFastTrace (OFT) specification items, and establish bidirectional traceability with `[impl->...]` and `[utest->...]` coverage markers.
+Extract clean, stable domain requirements from existing source code and tests, represent them as OpenFastTrace (OFT) specification items, and establish bidirectional traceability with implementation and test coverage markers.
 
-## Core Philosophy
+## OFT Reference and Organizational Guidelines
 
-When reverse-engineering specifications from an existing codebase, the goal is to capture **what** the system must do from a domain perspective (business rules, functional constraints, boundary conditions), **not how** the code currently computes or organizes it (algorithms, heuristics, scoring weights, internal class APIs, or data structures).
+For basic OpenFastTrace concepts, item ID syntax (`type~name~revision`), coverage markers (`[impl->...]`, `[utest->...]`), and trace verification, consult the main OpenFastTrace skill:
 
-Requirements must remain stable over time. If an internal algorithm, heuristic threshold, or class refactoring changes tomorrow, well-formulated requirements will continue to stand.
+`skills/openfasttrace/SKILL.md`
+
+### Organizational Guidelines and Tracing Chains
+
+OpenFastTrace is an unopinionated, flexible tracing tool. Different organizations and projects establish their own requirement guidelines, artifact types, and tracing chains:
+
+- **Tracing Chains**: Projects typically define chains from unrefined, high-level artifacts to refined, lower-level specifications (e.g., `feat --> req --> impl/utest`, `epic --> story --> impl/utest`, or chains incorporating architecture `arch --> dsn`).
+- **Storage Locations**: Each project organizes specifications according to its own structure (e.g., `docs/requirements/`, `doc/specs/`, `spec/system/`).
+- **Style and Formatting**: Projects may use Markdown, AsciiDoc, reStructuredText, or Gherkin feature files, each with project-specific phrasing or linting standards.
+
+The AI agent must always search for and follow the target repository's established documentation, requirement guides, and architecture records before writing specifications.
+
+### Inquiring When Guidelines Are Missing
+
+If the project does not have documented requirement guidelines or directory conventions:
+
+1. **Ask the user explicitly**:
+   - What traceability chain and artifact types to use (e.g. `feat --> req`).
+   - Where the specification files should be stored.
+   - What naming conventions or formatting rules should be followed.
+2. **Propose a sensible fallback**: If the user has no preference, propose `feat --> req --> impl/utest` stored in a dedicated specifications directory (e.g., `docs/requirements/`).
 
 ---
 
-## Golden Rules
+## Core Principles
 
 ### 1. Abstract Domain Rules, Do Not Codify Implementation Details
 
-- **Avoid Algorithmic Specifics**: Do not encode weights, mathematical formulas, scoring thresholds, or heuristic steps into requirements (e.g., `similarity > 0.8` or `weights map`). These are implementation choices subject to tuning and refactoring.
-- **Avoid API / Class Mechanics**: Do not write requirements for internal class methods, helper utilities, or interface contracts (e.g., `compareEntriesStrictly` or `CollectionDuplicateDetector`). Requirements describe system behavior, not class signatures.
-- **Focus on the Domain Invariant**: Ask: *What real-world or domain fact makes this condition true or false?* (e.g., "Entries for different parts of the same book must not be considered duplicates").
+- **Separate Business Rules from Internal Mechanics**: Capture *what* the system must do from a domain perspective (functional rules, boundary conditions, business constraints), not *how* the code computes it (algorithms, heuristics, scoring weights, threshold values, internal caches, or data structures).
+- **Avoid Encoding API or Class Mechanics**: Do not write requirements for internal class methods, helper utilities, or interface contracts. Requirements describe system behavior, not class signatures.
+- **Ensure Specification Stability**: Requirements must remain valid even if the underlying algorithm, scoring model, or class architecture is refactored.
 
-### 2. Formulate Self-Evident, Normative Headings
+### 2. Follow TDD Inspection Order When Applicable
 
-- **`feat~...~` (Feature)**: Formulate as **"User can verb"** (user capability, e.g., `# User can detect duplicate entries`).
-- **`req~...~` (Requirement)**: Formulate as **"Subject must verb"** (normative constraint, e.g., `## Entries with differing editions must not be considered duplicates`).
-- **Heading Carries the Complete Constraint**: Anyone reading only the heading should understand the full normative rule without reading the body text.
-- **Avoid Nominalizations**: Write "must be verified" instead of "verification", "must normalize" instead of "normalization".
-- **One Item, One Rule**: If a title contains "and", consider splitting it into two separate requirements unless the conditions are strictly inseparable.
+- **Tests First in TDD Environments**: If the codebase follows Test-Driven Development (TDD) or has comprehensive, expressive unit tests, inspect the **unit tests first**.
+- **Tests Reveal Intent**: Well-written unit tests clearly express the intended behavioral contract, boundary conditions, and edge cases without the cognitive noise of low-level implementation details.
+- **Implementation Second**: After identifying the domain rules from tests, inspect the implementation to verify rule execution order, guards, and uncovered branches.
 
-### 3. Keep Descriptions Lean and Rationales Factual
+### 3. Keep Rationales and Descriptions Factually Accurate
 
-- **Do Not Restate the Title**: If the heading is self-evident, omit redundant descriptive paragraphs.
-- **Do Not Leak Implementation in Descriptions**: Never describe code paths, variable names, or class structures in the requirement body.
-- **Use `Rationale:` Strictly for the "Why"**:
-  - Explain why an exception exists (e.g., why a generic `misc` type is permitted to match other types).
-  - Explain why a constraint is necessary (e.g., why chapter entries sharing an ISBN need further verification).
-- **Be Factually Accurate (Do Not Overstate Capabilities)**:
-  - Describe only the exact behavior the code guarantees.
-  - *Example*: If the code only strips periods from journal names (`replace(".", "")`) and lowercases them, do **not** claim in the rationale that "journal abbreviations are harmonized". State factually that "journal names (ignoring periods and casing)" are normalized.
+- **Use Rationales for Context**: When a business rule includes exceptions, non-obvious constraints, or specific edge cases, use `Rationale:` to explain the domain reason behind it.
+- **Avoid Overstating Capabilities**: State only what the system factually guarantees. Do not promise broader normalizations or features in requirement rationales that the code and tests do not actually implement.
+- **Keep Requirements Focused**: Avoid unnecessary narrative that merely repeats the requirement title or leaks internal variable names.
 
 ### 4. Tag at the Point of Usage, Not Definition
 
 - **Call-Site Placement for `[impl->...]`**:
-  - Place implementation coverage tags where the rule is **evaluated, dispatched, or enforced** in the primary business logic flow.
-  - **Do NOT** place tags on private helper method declarations. Helper methods are implementation details that may be inlined, renamed, or extracted.
-  - In compound conditions (`if (ruleA || ruleB || ruleC)`), place the specific tag directly before each clause or branch.
+  - Place implementation coverage tags where the rule is **evaluated, dispatched, or enforced** in the primary workflow.
+  - Avoid placing tags on private helper method declarations, as helper methods are implementation details subject to inlining or refactoring.
+  - In compound boolean expressions, place specific tags before each relevant clause or branch.
 - **Targeted Placement for `[utest->...]`**:
-  - Place unit test tags on the specific test methods or parameterized tests that verify that exact requirement.
+  - Place test coverage tags directly on the specific test methods or test cases that verify each requirement.
 
 ---
 
 ## Reverse-Engineering Workflow
 
-### Step 1: Trace Code Flow and Decision Points
+### Step 1: Discover Project Guidelines
 
-1. **Locate Primary Entry Points**: Find the public methods that make decisions (e.g., `isDuplicate(entry1, entry2)`).
-2. **Identify Decision Trees and Guards**:
-   - What causes immediate positive outcomes (early returns, matches)?
-   - What causes immediate negative outcomes (guards, exclusions, incompatibilities)?
-   - What falls through to deeper checks or similarity heuristics?
-3. **Identify Rule Precedence**:
-   - Imperative code evaluates sequentially. If one rule takes absolute priority (e.g., identical persistent identifiers override entry type checks), explicitly document that precedence.
+1. Look for repository documentation regarding requirement tracing (e.g., `CONTRIBUTING.md`, `AGENTS.md`, `docs/code-howtos/`, or existing files in `docs/requirements/`).
+2. If guidelines are absent or ambiguous, ask the user for the preferred tracing chain and destination folder.
 
-### Step 2: Analyze Tests for Domain Intent
+### Step 2: Analyze Tests and Code Flow
 
-1. Examine unit test method names and assertions (e.g., `@Test void bookAndInBookWithSameTitleIsNotDuplicate()`).
-2. Tests often express domain rules and edge cases far more clearly than the implementation code.
-3. Group tests by the behavioral rule they validate.
+1. **If TDD or thorough test suite exists**:
+   - Read test classes, parameterized test datasets, and assertion messages.
+   - Group tests by the behavioral rules and edge cases they validate.
+2. **Examine Implementation Logic**:
+   - Identify entry point methods and primary decision paths.
+   - Trace conditional guards, early exits, and fallback behavior.
+   - Note rule precedence: in sequential evaluations, record which rules take priority over others.
 
-### Step 3: Extract and Formulate Requirements
+### Step 3: Extract Features and Requirements
 
-1. Define the parent feature:
+1. **Do not limit to a single feature**: Identify as many high-level features (`feat` or project equivalent) and detailed requirements (`req` or project equivalent) as necessary to accurately capture the analyzed scope.
+2. Ensure each requirement represents an independent, cohesive domain rule.
+
+### Step 4: Illustrative Example (Entity Comparison)
+
+Consider an illustrative scenario where a component compares two entity records to determine if they represent the same real-world entity:
+
+1. **Define the Feature and Requirements in the Specification File**:
 
    ```markdown
-   # User can detect duplicate entries
-   `feat~duplicate-check~1`
+   # User can detect duplicate records
+   `feat~entity-deduplication~1`
 
-   JabRef can detect whether two bibliographic entries represent the same publication.
+   The system detects whether two records represent the same entity.
 
    Needs: req
-   ```
 
-2. Derive each specific requirement covering the feature:
+   ## Records with identical unique identifiers are considered duplicates
+   `req~entity-deduplication.same-identifier~1`
 
-   ```markdown
-   ## Entries with identical persistent identifiers must be considered duplicates
-   `req~duplicate-check.same-identifier~1`
-
-   This rule has the highest priority over the others listed below.
+   This rule has priority over subsequent field comparisons.
 
    Needs: impl, utest
 
    Covers:
 
-   - feat~duplicate-check~1
-   ```
+   - feat~entity-deduplication~1
 
-3. Add rationale where domain context or exceptions need explanation:
+   ## Records with incompatible entity types are not duplicates
+   `req~entity-deduplication.type-compatibility~1`
 
-   ```markdown
-   ## Entries with different entry types must not be considered duplicates unless one is misc
-   `req~duplicate-check.entry-type-compatibility~1`
-
-   Rationale: Entries with the generic `misc` type may represent unclassified records of any type and can therefore match entries of other types.
+   Rationale: Different entity types represent distinct categories that cannot be matched unless marked as an unclassified generic type.
 
    Needs: impl, utest
 
    Covers:
 
-   - feat~duplicate-check~1
+   - feat~entity-deduplication~1
    ```
 
-### Step 4: Link Implementation (`[impl->...]`) at Usage Sites
+2. **Link Implementation (`[impl->...]`) at Usage Points**:
 
-Annotate the code where the rule is evaluated in the primary workflow:
+   ```java
+   public boolean isDuplicate(final Entity recordOne, final Entity recordTwo) {
+       // [impl->req~entity-deduplication.same-identifier~1]
+       if (haveSameIdentifier(recordOne, recordTwo)) {
+           return true;
+       }
 
-```java
-public boolean isDuplicate(final BibEntry one, final BibEntry two) {
-    // [impl->req~duplicate-check.same-identifier~1]
-    if (haveSameIdentifier(one, two)) {
-        return true;
-    }
+       // [impl->req~entity-deduplication.type-compatibility~1]
+       if (haveIncompatibleTypes(recordOne, recordTwo)) {
+           return false;
+       }
+       ...
+   ```
 
-    if (
-        // [impl->req~duplicate-check.entry-type-compatibility~1]
-        haveDifferentEntryType(one, two) ||
-        // [impl->req~duplicate-check.different-editions~1]
-        haveDifferentEditions(one, two) ||
-        // [impl->req~duplicate-check.book-parts-different-chapters-or-pages~1]
-        haveDifferentChaptersOrPagesOfTheSameBook(one, two)
-    ) {
-        return false;
-    }
-```
+3. **Link Unit Tests (`[utest->...]`)**:
 
-### Step 5: Link Tests (`[utest->...]`)
+   ```java
+   // [utest->req~entity-deduplication.same-identifier~1]
+   @Test
+   void recordsWithIdenticalIdentifiersMatch() {
+       ...
+   }
 
-Annotate the corresponding test methods:
+   // [utest->req~entity-deduplication.type-compatibility~1]
+   @Test
+   void recordsWithDifferentTypesDoNotMatch() {
+       ...
+   }
+   ```
 
-```java
-// [utest->req~duplicate-check.same-identifier~1]
-@Test
-void sameDoiMeansDuplicate() {
-    ...
-}
+### Step 5: Verify Tracing and Project Quality Gates
 
-// [utest->req~duplicate-check.entry-type-compatibility~1]
-@Test
-void differentTypesAreNotDuplicatesUnlessMisc() {
-    ...
-}
-```
-
-### Step 6: Validate Tracing and Code Quality
-
-1. **OFT Tracing Verification**: Run the project's OFT task (e.g. `./gradlew traceRequirements` or `oft check`) and verify:
-   - All `feat` items have covering `req` items.
-   - All `req` items have covering `impl` and `utest` items.
-   - Zero broken or dangling references.
-2. **Linter & Style Verification**:
-   - Check Markdown formatting (`npx markdownlint-cli2`).
-   - Run code linters (`checkstyle`, `spotless`, etc.).
-   - Run unit tests to confirm all tests pass.
-
----
-
-## Anti-Patterns to Avoid
-
-| Anti-Pattern | Why It Fails | What to Do Instead |
-| :--- | :--- | :--- |
-| **Encoding Thresholds** (e.g., similarity score must exceed 0.8) | Ties requirement to a specific mathematical formula or weight matrix. Breaks if heuristic changes. | **State Domain Rule** (e.g., Field comparison must normalize specialized fields before similarity matching). |
-| **Specifying API Signatures** (e.g., DuplicateCheck must provide compareEntriesStrictly) | Interface mechanics are code architecture, not business requirements. | Focus on the domain behavior or functional result. |
-| **Tagging Method Definitions** (e.g., tagging `private boolean helper(...)`) | Helper methods can be refactored or reused. The rule is executed at the call site. | Tag at the **usage / decision site** where the rule is evaluated in the workflow. |
-| **Overstating Capabilities** (e.g., stating abbreviations are harmonized when only periods are dropped) | Misleads reviewers and users; promises behavior that is not tested or implemented. | State accurately: `journal names (ignoring periods and casing) are normalized`. |
-| **Verbose Repetition** (e.g., paragraph in body repeating the heading in different words) | Adds maintenance noise without adding value. | If heading is self-evident, omit body text. Use body only for `Rationale:` or rule precedence. |
+1. **Run OpenFastTrace Verification**: Run the project's OFT command (e.g., Gradle task, Maven plugin, or `oft` CLI) according to project conventions:
+   - Ensure all high-level items have covering requirements.
+   - Ensure all requirements have covering `impl` and `utest` tags.
+   - Ensure there are no broken links or missing dependencies.
+2. **Run Project Linters**: Run the appropriate linters for the specification file formats (e.g. Markdown or reStructuredText linters) and code linters configured in the repository.
+3. **Execute Test Suite**: Run the relevant test suite to confirm all tests pass and coverage is active.
