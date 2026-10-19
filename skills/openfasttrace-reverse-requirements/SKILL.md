@@ -18,7 +18,7 @@ For basic OpenFastTrace concepts, item ID syntax (`type~name~revision`), coverag
 OpenFastTrace is an unopinionated, flexible tracing tool. Different organizations and projects establish their own requirement guidelines, artifact types, and tracing chains:
 
 - **Tracing Chains**: Projects typically define chains from unrefined, high-level artifacts to refined, lower-level specifications (e.g., `feat --> req --> impl/utest`, `epic --> story --> impl/utest`, or chains incorporating architecture `arch --> dsn`).
-- **Storage Locations**: Each project organizes specifications according to its own structure (e.g., `docs/requirements/`, `doc/specs/`, `spec/system/`).
+- **Storage Locations**: Each project organizes specifications according to its own structure (e.g., `doc/specs/`, `spec/system/`, `docs/requirements/`).
 - **Style and Formatting**: Projects may use Markdown, AsciiDoc, reStructuredText, or Gherkin feature files, each with project-specific phrasing or linting standards.
 
 The AI agent must always search for and follow the target repository's established documentation, requirement guides, and architecture records before writing specifications.
@@ -31,7 +31,7 @@ If the project does not have documented requirement guidelines or directory conv
    - What traceability chain and artifact types to use (e.g. `feat --> req`).
    - Where the specification files should be stored.
    - What naming conventions or formatting rules should be followed.
-2. **Propose a sensible fallback**: If the user has no preference, propose `feat --> req --> impl/utest` stored in a dedicated specifications directory (e.g., `docs/requirements/`).
+2. **Propose a sensible fallback**: If the user has no preference, propose `feat --> req --> impl/utest` stored in a dedicated specifications directory (e.g., `doc/specs/`).
 
 ---
 
@@ -70,7 +70,7 @@ If the project does not have documented requirement guidelines or directory conv
 
 ### Step 1: Discover Project Guidelines
 
-1. Look for repository documentation regarding requirement tracing (e.g., `CONTRIBUTING.md`, `AGENTS.md`, `docs/code-howtos/`, or existing files in `docs/requirements/`).
+1. Look for repository documentation regarding requirement tracing (e.g., developer guides, architecture documentation, contributing guides, or existing specification files).
 2. If guidelines are absent or ambiguous, ask the user for the preferred tracing chain and destination folder.
 
 ### Step 2: Analyze Tests and Code Flow
@@ -90,72 +90,106 @@ If the project does not have documented requirement guidelines or directory conv
 
 ### Step 4: Illustrative Example (Entity Comparison)
 
-Consider an illustrative scenario where a component compares two entity records to determine if they represent the same real-world entity:
+#### 1. Untraced Source Code and Tests
 
-1. **Define the Feature and Requirements in the Specification File**:
+Start with the existing untraced implementation code:
 
-   ```markdown
-   # User can detect duplicate records
-   `feat~entity-deduplication~1`
+```java
+public boolean isDuplicate(final Entity recordOne, final Entity recordTwo) {
+    if (haveSameIdentifier(recordOne, recordTwo)) {
+        return true;
+    }
 
-   The system detects whether two records represent the same entity.
+    if (haveIncompatibleTypes(recordOne, recordTwo)) {
+        return false;
+    }
+    ...
+```
 
-   Needs: req
+And its existing untraced unit tests:
 
-   ## Records with identical unique identifiers are considered duplicates
-   `req~entity-deduplication.same-identifier~1`
+```java
+@Test
+void recordsWithIdenticalIdentifiersMatch() {
+    ...
+}
 
-   This rule has priority over subsequent field comparisons.
+@Test
+void recordsWithDifferentTypesDoNotMatch() {
+    ...
+}
+```
 
-   Needs: impl, utest
+#### 2. Derived Requirements
 
-   Covers:
+From the code logic and test cases, deduce the feature and domain requirements:
 
-   - feat~entity-deduplication~1
+```markdown
+# User can detect duplicate records
+`feat~entity-deduplication~1`
 
-   ## Records with incompatible entity types are not duplicates
-   `req~entity-deduplication.type-compatibility~1`
+The system detects whether two records represent the same entity.
 
-   Rationale: Different entity types represent distinct categories that cannot be matched unless marked as an unclassified generic type.
+Needs: req
 
-   Needs: impl, utest
+## Records with identical unique identifiers are considered duplicates
+`req~entity-deduplication.same-identifier~1`
 
-   Covers:
+This rule has priority over subsequent field comparisons.
 
-   - feat~entity-deduplication~1
-   ```
+Needs: impl, utest
 
-2. **Link Implementation (`[impl->...]`) at Usage Points**:
+Covers:
 
-   ```java
-   public boolean isDuplicate(final Entity recordOne, final Entity recordTwo) {
-       // [impl->req~entity-deduplication.same-identifier~1]
-       if (haveSameIdentifier(recordOne, recordTwo)) {
-           return true;
-       }
+- feat~entity-deduplication~1
 
-       // [impl->req~entity-deduplication.type-compatibility~1]
-       if (haveIncompatibleTypes(recordOne, recordTwo)) {
-           return false;
-       }
-       ...
-   ```
+## Records with incompatible entity types are not duplicates
+`req~entity-deduplication.type-compatibility~1`
 
-3. **Link Unit Tests (`[utest->...]`)**:
+Rationale: Different entity types represent distinct categories that cannot be matched unless marked as an unclassified generic type.
 
-   ```java
-   // [utest->req~entity-deduplication.same-identifier~1]
-   @Test
-   void recordsWithIdenticalIdentifiersMatch() {
-       ...
-   }
+Needs: impl, utest
 
-   // [utest->req~entity-deduplication.type-compatibility~1]
-   @Test
-   void recordsWithDifferentTypesDoNotMatch() {
-       ...
-   }
-   ```
+Covers:
+
+- feat~entity-deduplication~1
+```
+
+#### 3. Tagged Implementation at Usage Points
+
+Add `[impl->...]` tags directly where each rule is evaluated:
+
+```java
+public boolean isDuplicate(final Entity recordOne, final Entity recordTwo) {
+    // [impl->req~entity-deduplication.same-identifier~1]
+    if (haveSameIdentifier(recordOne, recordTwo)) {
+        return true;
+    }
+
+    // [impl->req~entity-deduplication.type-compatibility~1]
+    if (haveIncompatibleTypes(recordOne, recordTwo)) {
+        return false;
+    }
+    ...
+```
+
+#### 4. Tagged Unit Tests
+
+Add `[utest->...]` tags to the corresponding test methods:
+
+```java
+// [utest->req~entity-deduplication.same-identifier~1]
+@Test
+void recordsWithIdenticalIdentifiersMatch() {
+    ...
+}
+
+// [utest->req~entity-deduplication.type-compatibility~1]
+@Test
+void recordsWithDifferentTypesDoNotMatch() {
+    ...
+}
+```
 
 ### Step 5: Verify Tracing and Project Quality Gates
 
