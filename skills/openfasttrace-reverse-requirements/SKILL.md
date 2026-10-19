@@ -20,8 +20,9 @@ OpenFastTrace is an unopinionated, flexible tracing tool. Different organization
 - **Tracing Chains**: Projects typically define chains from unrefined, high-level artifacts to refined, lower-level specifications (e.g., `feat --> req --> impl/utest`, `epic --> story --> impl/utest`, or chains incorporating architecture `arch --> dsn`).
 - **Storage Locations**: Each project organizes specifications according to its own structure (e.g., `doc/specs/`, `spec/system/`, `docs/requirements/`).
 - **Style and Formatting**: Projects may use Markdown, AsciiDoc, reStructuredText, or Gherkin feature files, each with project-specific phrasing or linting standards.
+- **Project Terminology**: Projects maintain their own ubiquitous language, domain concepts, and naming conventions. The AI agent must strictly adopt the project's established terminology (e.g., how the project names core entities, actions, and roles) rather than introducing external or generic terms.
 
-The AI agent must always search for and follow the target repository's established documentation, requirement guides, and architecture records before writing specifications.
+The AI agent must always search for and follow the target repository's established documentation, requirement guides, architecture records, and project terminology before writing specifications.
 
 ### Inquiring When Guidelines Are Missing
 
@@ -42,6 +43,7 @@ If the project does not have documented requirement guidelines or directory conv
 - **Separate Business Rules from Internal Mechanics**: Capture *what* the system must do from a domain perspective (functional rules, boundary conditions, business constraints), not *how* the code computes it (algorithms, heuristics, scoring weights, threshold values, internal caches, or data structures).
 - **Avoid Encoding API or Class Mechanics**: Do not write requirements for internal class methods, helper utilities, or interface contracts. Requirements describe system behavior, not class signatures.
 - **Ensure Specification Stability**: Requirements must remain valid even if the underlying algorithm, scoring model, or class architecture is refactored.
+- **Adhere to Project Domain Terminology**: Frame domain rules using the project's established concepts and glossary (e.g., how the project names core domain entities, attributes, and roles) instead of introducing generic synonyms.
 
 ### 2. Follow TDD Inspection Order When Applicable
 
