@@ -225,3 +225,11 @@ void recordsWithDifferentEditionsDoNotMatch() {
    - Ensure there are no broken links or missing dependencies.
 2. **Run Project Linters**: Run the appropriate linters for the specification file formats (e.g. Markdown or reStructuredText linters) and code linters configured in the repository.
 3. **Execute Test Suite**: Run the relevant test suite to confirm all tests pass and coverage is active.
+
+### Step 6: Present Results with Draft Disclaimer
+
+When presenting the reverse-engineered requirements to the user, inform them that the generated specifications should be considered a draft proposal and a strong starting point:
+
+- **Potential Over-Coverage**: Reverse-engineering from code and tests may occasionally capture defensive guards, implementation heuristics, or auxiliary utilities that the project may not intend to treat as formal domain requirements.
+- **Implementation Artifacts**: The inferred requirements reflect the existing codebase's technical choices and legacy assumptions, which might not represent the desired target architecture.
+- **Human Review**: Advise the user to review the generated items to confirm domain boundaries, prune unnecessary specifications, and adapt the phrasing before committing them as definitive project requirements.
