@@ -49,11 +49,12 @@ If the project does not have documented requirement guidelines or directory conv
 - **Tests Reveal Intent**: Well-written unit tests clearly express the intended behavioral contract, boundary conditions, and edge cases without the cognitive noise of low-level implementation details.
 - **Implementation Second**: After identifying the domain rules from tests, inspect the implementation to verify rule execution order, guards, and uncovered branches.
 
-### 3. Keep Rationales and Descriptions Factually Accurate
+### 3. Make Titles Self-Contained and Strictly Omit Redundant Body Text
 
-- **Use Rationales for Context**: When a business rule includes exceptions, non-obvious constraints, or specific edge cases, use `Rationale:` to explain the domain reason behind it.
-- **Avoid Overstating Capabilities**: State only what the system factually guarantees. Do not promise broader normalizations or features in requirement rationales that the code and tests do not actually implement.
-- **Keep Requirements Focused**: Avoid unnecessary narrative that merely repeats the requirement title or leaks internal variable names.
+- **Titles Carry the Full Constraint**: Formulate headings so they clearly express the complete normative domain constraint. Anyone reading only the heading should understand the rule.
+- **Strictly Omit Redundant Descriptions**: If the heading expresses the constraint, **do not write explanatory paragraphs under it**. Paraphrasing the heading in prose adds maintenance bloat. Proceed directly from the requirement tag to `Needs:` (or `Rationale:` / priority notes).
+- **Use `Rationale:` Strictly for the "Why"**: Use `Rationale:` *only* when an exception, non-obvious constraint, or business reason requires explanation (e.g., explaining why a generic fallback type is allowed to match specific types).
+- **Avoid Overstating Capabilities**: State only what the system factually guarantees. Do not promise broader features or normalizations in rationales that the code and tests do not actually implement.
 
 ### 4. Tag at the Point of Usage, Not Definition
 
@@ -86,7 +87,7 @@ If the project does not have documented requirement guidelines or directory conv
 ### Step 3: Extract Features and Requirements
 
 1. **Do not limit to a single feature**: Identify as many high-level features (`feat` or project equivalent) and detailed requirements (`req` or project equivalent) as necessary to accurately capture the analyzed scope.
-2. Ensure each requirement represents an independent, cohesive domain rule.
+2. Ensure each requirement represents an independent, cohesive domain rule with a self-contained title and no redundant body narrative.
 
 ### Step 4: Illustrative Example (Entity Comparison)
 
@@ -100,7 +101,8 @@ public boolean isDuplicate(final Entity recordOne, final Entity recordTwo) {
         return true;
     }
 
-    if (haveIncompatibleTypes(recordOne, recordTwo)) {
+    if (haveIncompatibleTypes(recordOne, recordTwo) ||
+        haveDifferentEditions(recordOne, recordTwo)) {
         return false;
     }
     ...
@@ -115,14 +117,19 @@ void recordsWithIdenticalIdentifiersMatch() {
 }
 
 @Test
-void recordsWithDifferentTypesDoNotMatch() {
+void recordsWithDifferentTypesDoNotMatchUnlessGeneric() {
+    ...
+}
+
+@Test
+void recordsWithDifferentEditionsDoNotMatch() {
     ...
 }
 ```
 
 #### 2. Derived Requirements
 
-From the code logic and test cases, deduce the feature and domain requirements:
+From the code logic and test cases, deduce the feature and domain requirements. Note that requirements with self-evident headings contain **no redundant body paragraphs**:
 
 ```markdown
 # User can detect duplicate records
@@ -143,10 +150,19 @@ Covers:
 
 - feat~entity-deduplication~1
 
-## Records with incompatible entity types are not duplicates
+## Records with differing editions are not duplicates
+`req~entity-deduplication.different-editions~1`
+
+Needs: impl, utest
+
+Covers:
+
+- feat~entity-deduplication~1
+
+## Records with incompatible entity types are not duplicates unless one is a generic type
 `req~entity-deduplication.type-compatibility~1`
 
-Rationale: Different entity types represent distinct categories that cannot be matched unless marked as an unclassified generic type.
+Rationale: Generic fallback types may represent unclassified records of any type and are allowed to match more specific types.
 
 Needs: impl, utest
 
@@ -166,8 +182,12 @@ public boolean isDuplicate(final Entity recordOne, final Entity recordTwo) {
         return true;
     }
 
-    // [impl->req~entity-deduplication.type-compatibility~1]
-    if (haveIncompatibleTypes(recordOne, recordTwo)) {
+    if (
+        // [impl->req~entity-deduplication.type-compatibility~1]
+        haveIncompatibleTypes(recordOne, recordTwo) ||
+        // [impl->req~entity-deduplication.different-editions~1]
+        haveDifferentEditions(recordOne, recordTwo)
+    ) {
         return false;
     }
     ...
@@ -186,7 +206,13 @@ void recordsWithIdenticalIdentifiersMatch() {
 
 // [utest->req~entity-deduplication.type-compatibility~1]
 @Test
-void recordsWithDifferentTypesDoNotMatch() {
+void recordsWithDifferentTypesDoNotMatchUnlessGeneric() {
+    ...
+}
+
+// [utest->req~entity-deduplication.different-editions~1]
+@Test
+void recordsWithDifferentEditionsDoNotMatch() {
     ...
 }
 ```
