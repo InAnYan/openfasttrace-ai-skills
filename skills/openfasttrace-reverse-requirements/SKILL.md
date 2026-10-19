@@ -1,6 +1,6 @@
 ---
 name: oft-reverse-requirements
-description: Reverse-engineer requirements from existing source code and tests into OpenFastTrace specification items, link implementation and test coverage markers, and adapt to the project's requirement guidelines. Use when an AI agent needs to deduce requirements from legacy or untraced code, identify business rules and edge cases, and trace them using OpenFastTrace.
+description: Reverse-engineer requirements from existing source code and tests into OpenFastTrace specification items, link implementation and test coverage markers, and adapt to the project's requirement guidelines. Use to deduce requirements from legacy or untraced code, identify business rules and edge cases, and trace them using OpenFastTrace.
 ---
 
 # OFT Reverse Requirements from Code
@@ -20,9 +20,9 @@ OpenFastTrace is an unopinionated, flexible tracing tool. Different organization
 - **Tracing Chains**: Projects typically define chains from unrefined, high-level artifacts to refined, lower-level specifications (e.g., `feat --> req --> impl/utest`, `epic --> story --> impl/utest`, or chains incorporating architecture `arch --> dsn`).
 - **Storage Locations**: Each project organizes specifications according to its own structure (e.g., `doc/specs/`, `spec/system/`, `docs/requirements/`).
 - **Style and Formatting**: Projects may use Markdown, AsciiDoc, reStructuredText, or Gherkin feature files, each with project-specific phrasing or linting standards.
-- **Project Terminology**: Projects maintain their own ubiquitous language, domain concepts, and naming conventions. The AI agent must strictly adopt the project's established terminology (e.g., how the project names core entities, actions, and roles) rather than introducing external or generic terms.
+- **Project Terminology**: Projects maintain their own ubiquitous language, domain concepts, and naming conventions. Strictly adopt the project's established terminology (e.g., how the project names core entities, actions, and roles) rather than introducing external or generic terms.
 
-The AI agent must always search for and follow the target repository's established documentation, requirement guides, architecture records, and project terminology before writing specifications.
+Always search for and follow the target repository's established documentation, requirement guides, architecture records, and project terminology before writing specifications.
 
 ### Inquiring When Guidelines Are Missing
 
