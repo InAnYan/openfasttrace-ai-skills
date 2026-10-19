@@ -11,7 +11,7 @@ Extract clean, stable domain requirements from existing source code and tests, r
 
 For basic OpenFastTrace concepts, item ID syntax (`type~name~revision`), coverage markers (`[impl->...]`, `[utest->...]`), and trace verification, consult the main OpenFastTrace skill:
 
-`skills/openfasttrace/SKILL.md`
+`https://github.com/itsallcode/openfasttrace-ai-skills/blob/main/skills/openfasttrace/SKILL.md`
 
 ### Organizational Guidelines and Tracing Chains
 
